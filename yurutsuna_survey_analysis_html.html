@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ゆるつなサロン｜アンケート分析レポート</title>
+  <style>
+    :root {
+      --bg: #f7f3ec;
+      --paper: #ffffff;
+      --ink: #1f2933;
+      --muted: #65727f;
+      --line: #e6ddd2;
+      --orange: #d8793a;
+      --orange-soft: #f7e4d5;
+      --green: #6f947b;
+      --green-soft: #e8f0ea;
+      --beige: #efe7dc;
+      --shadow: 0 14px 40px rgba(80, 55, 30, 0.12);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(216, 121, 58, 0.16), transparent 34%),
+        radial-gradient(circle at top right, rgba(111, 148, 123, 0.15), transparent 30%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Noto Sans JP", system-ui, sans-serif;
+      line-height: 1.8;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 22px 72px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #fbf5ed 62%, #f3dfcd 100%);
+      border: 1px solid rgba(216, 121, 58, 0.18);
+      border-radius: var(--radius-lg);
+      padding: 46px 46px 42px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -70px;
+      top: -70px;
+      width: 230px;
+      height: 230px;
+      background: rgba(111, 148, 123, 0.14);
+      border-radius: 999px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      padding: 6px 13px;
+      color: var(--green);
+      background: var(--green-soft);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.24;
+      letter-spacing: 0.02em;
+    }
+
+    .lead {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .highlight {
+      color: var(--orange);
+      font-weight: 800;
+    }
+
+    .summary-card {
+      margin-top: 24px;
+      padding: 24px 26px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(216, 121, 58, 0.2);
+      border-radius: var(--radius-md);
+    }
+
+    .summary-card strong {
+      color: var(--orange);
+    }
+
+    .section {
+      margin-top: 34px;
+      background: var(--paper);
+      border: 1px solid rgba(230, 221, 210, 0.9);
+      border-radius: var(--radius-lg);
+      padding: 34px;
+      box-shadow: 0 10px 28px rgba(58, 41, 25, 0.08);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .num {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: var(--orange);
+      background: var(--orange-soft);
+      border-radius: 15px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 30px);
+      line-height: 1.35;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th,
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #fbf7f1;
+      color: #4f3b2b;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .votes {
+      width: 130px;
+      color: var(--orange);
+      font-size: 20px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .bar {
+      width: 100%;
+      min-width: 120px;
+      height: 10px;
+      background: #f0ebe5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), #e9a06a);
+      border-radius: inherit;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .insight {
+      padding: 22px;
+      background: #fbf8f3;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .insight h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      border-radius: 999px;
+    }
+
+    .quote-box {
+      margin: 20px 0;
+      padding: 22px 24px;
+      background: linear-gradient(135deg, var(--green-soft), #ffffff);
+      border-left: 7px solid var(--green);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.7;
+    }
+
+    .copy-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .copy-item {
+      padding: 16px 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+    }
+
+    .balance {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .balance-card {
+      padding: 22px 18px;
+      text-align: center;
+      background: #fbf7f1;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .balance-card .percent {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--orange);
+      font-size: 34px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .zero-list {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      margin: 16px 0 0;
+      list-style: none;
+    }
+
+    .zero-list li {
+      position: relative;
+      padding: 13px 16px 13px 42px;
+      background: #fbf8f3;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    .zero-list li::before {
+      content: "0";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      color: #fff;
+      background: #9b9b9b;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .conclusion {
+      margin-top: 34px;
+      padding: 38px 34px;
+      color: #fff;
+      background: linear-gradient(135deg, #6f947b, #395b45);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .conclusion h2 {
+      margin-bottom: 14px;
+    }
+
+    .conclusion p {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .tagline {
+      margin-top: 22px;
+      padding: 20px 22px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: var(--radius-md);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 28px 14px 48px;
+      }
+
+      .hero,
+      .section,
+      .conclusion {
+        padding: 26px 20px;
+        border-radius: 22px;
+      }
+
+      .section-header {
+        flex-direction: column;
+      }
+
+      .insight-grid,
+      .balance {
+        grid-template-columns: 1fr;
+      }
+
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none;
+      }
+
+      .votes {
+        width: auto;
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">アンケート分析レポート</div>
+      <h1>ゆるつなサロンは、<br><span class="highlight">「交流会」より「自分を整える場」</span>として刺さっている</h1>
+      <p class="lead">
+        回答数は3件のため統計的な断定はできませんが、参加者が期待している価値の方向性はかなり明確です。
+        特に強いのは「人脈づくり」ではなく、対話を通じた内省・気づき・気持ちの整理です。
+      </p>
+      <div class="summary-card">
+        <strong>結論：</strong> 今後の訴求は「ゆるくつながれる交流会」だけでなく、
+        「日常から少し離れて、自分の考えや気持ちを整理できるサードプレイス」に寄せると、より刺さりやすいです。
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="num">01</div>
+        <div>
+          <h2>特に票が集まった回答</h2>
+          <p class="sub">回答者3名のうち、どの項目に期待が集中しているかを整理</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>回答項目</th>
+              <th>票数</th>
+              <th>反応の強さ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>自分の考えや気持ちを少し整理できる</td>
+              <td class="votes">3票 / 100%</td>
+              <td><div class="bar"><span style="width: 100%"></span></div></td>
+            </tr>
+            <tr>
+              <td>普段とは違う価値観や考え方に触れられる</td>
+              <td class="votes">2票 / 66.7%</td>
+              <td><div class="bar"><span style="width: 66.7%"></span></div></td>
+            </tr>
+            <tr>
+              <td>仕事や日常の閉塞感が少し軽くなる</td>
+              <td class="votes">2票 / 66.7%</td>
+              <td><div class="bar"><span style="width: 66.7%"></span></div></td>
+            </tr>
+            <tr>
+              <td>これからやってみたいことのヒントが得られる</td>
+              <td class="votes">2票 / 66.7%</td>
+              <td><div class="bar"><span style="width: 66.7%"></span></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="num">02</div>
+        <div>
+          <h2>心理学的な分析</h2>
+          <p class="sub">参加者の深層ニーズは「つながり」よりも「自己理解」に近い</p>
+        </div>
+      </div>
+
+      <div class="quote-box">
+        参加者は、人とつながりたいというより、まずは自分の考えや気持ちを整理したい状態に近い。
+      </div>
+
+      <div class="insight-grid">
+        <article class="insight">
+          <h3><span class="dot"></span>自己理解欲求が強い</h3>
+          <p>
+            3名全員が「自分の考えや気持ちを少し整理できる」を選んでいます。
+            これは、誰かに話すことで自分の内面を言語化したいというニーズの表れです。
+          </p>
+        </article>
+
+        <article class="insight">
+          <h3><span class="dot"></span>強い助言より、自然な気づき</h3>
+          <p>
+            参加者は明確な答えや指導を求めているというより、自然な対話の中で
+            「自分はこう思っていたのか」と気づく時間を期待しています。
+          </p>
+        </article>
+
+        <article class="insight">
+          <h3><span class="dot"></span>閉塞感からの軽い解放</h3>
+          <p>
+            「仕事や日常の閉塞感が少し軽くなる」にも票が集まっています。
+            深刻な悩み相談ではなく、少し息がしやすくなる場が求められています。
+          </p>
+        </article>
+
+        <article class="insight">
+          <h3><span class="dot"></span>重すぎない安心感</h3>
+          <p>
+            「他の人の本音や悩みを聞ける」は0票でした。
+            つまり、重い悩み相談会ではなく、軽やかな対話と安心感が重要です。
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="num">03</div>
+        <div>
+          <h2>マーケティング的な分析</h2>
+          <p class="sub">打ち出すべき価値は「人脈」ではなく「思考整理のサードプレイス」</p>
+        </div>
+      </div>
+
+      <p>
+        この結果を見る限り、単に「ゆるくつながれる交流会」と打ち出すだけでは少し弱いです。
+        より刺さるのは、<strong>仕事や日常から少し離れて、自分の考えを整理できる場</strong>という表現です。
+      </p>
+
+      <div class="quote-box">
+        ゆるつなサロンの本質は、人脈づくりではなく、対話を通じて自分を整える時間。
+      </div>
+
+      <div class="copy-list">
+        <div class="copy-item">話すことで、自分の気持ちが少し整理される2時間。</div>
+        <div class="copy-item">名刺交換ではなく、今の自分に戻るためのゆるい対話の場。</div>
+        <div class="copy-item">仕事でも家庭でもない場所で、自分の考えをゆっくり整える時間。</div>
+        <div class="copy-item">正解を探す場ではなく、今の自分の気持ちに気づく場。</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="num">04</div>
+        <div>
+          <h2>理想的な場のバランス</h2>
+          <p class="sub">「癒やし」「気づき」「交流」の比率で設計する</p>
+        </div>
+      </div>
+
+      <p>
+        参加者は完全に受け身ではありません。普段とは違う価値観に触れたい、これからやってみたいことのヒントが欲しいという前向きな期待もあります。
+        ただし、セミナーのような勉強感や、ビジネス交流会のような圧は求められていません。
+      </p>
+
+      <div class="balance">
+        <div class="balance-card">
+          <span class="percent">50%</span>
+          癒やし・安心
+        </div>
+        <div class="balance-card">
+          <span class="percent">30%</span>
+          気づき・内省
+        </div>
+        <div class="balance-card">
+          <span class="percent">20%</span>
+          交流・ご縁
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="num">05</div>
+        <div>
+          <h2>逆に、あまり刺さっていないポイント</h2>
+          <p class="sub">0票の項目から、避けるべき打ち出し方も見える</p>
+        </div>
+      </div>
+
+      <ul class="zero-list">
+        <li>他の人の本音や悩みを聞ける</li>
+        <li>おなかとアタマも満たされる</li>
+        <li>次回も参加・交流を深めたい</li>
+        <li>その他</li>
+      </ul>
+
+      <p>
+        ここから分かるのは、参加者は現時点では、深い悩み相談・飲食目的・継続コミュニティ参加を強く求めているわけではないということです。
+        初回から「仲良くなりましょう」「深く語りましょう」「次回も来てください」という圧を出すと、温度感がズレる可能性があります。
+      </p>
+    </section>
+
+    <section class="conclusion">
+      <h2>結論</h2>
+      <p>
+        ゆるつなサロンの価値は、人脈づくりの場ではなく、日常から少し離れて、自分の考えや気持ちを整理し、
+        新しい視点や小さな前向きさを持ち帰れる場です。
+      </p>
+      <div class="tagline">
+        日常から少し離れて、<br>自分の気持ちを整える2時間。
+      </div>
+    </section>
+  </main>
+</body>
+</html>
